@@ -15,8 +15,8 @@ TEST_PASSWORD = SIGNUP_TEST_PASSWORD
 
 
 def generate_test_email():
-    # Generate a unique email for each registration test.
-    return f"qa_test_{uuid.uuid4().hex[:10]}@gmail.com"
+    # Generate a unique email address for each registration test.
+    return f"qa_test_{uuid.uuid4().hex[:6]}@gmail.com"
 
 
 # ============================================================
@@ -157,6 +157,34 @@ def test_signup_password_mismatch(page):
 # REGISTRATION FUNCTIONAL TESTS
 # ============================================================
 
+
+def test_signup_new_email_account(page):
+    # ============================================================
+    # Verify that a user can register successfully using
+    # a new email address.
+    # ============================================================
+
+    # Initialize the signup page.
+    signup_page = SignupPage(page)
+
+    # Generate a unique email address.
+    email = generate_test_email()
+
+    # Navigate to the signup page.
+    signup_page.navigate()
+
+    # Fill in the signup form.
+    signup_page.fill_signup_form(
+        email,
+        TEST_PASSWORD,
+        TEST_PASSWORD
+    )
+
+    # ============================================================
+    # Submit the registration request.
+    # ============================================================
+
+
 def test_signup_new_email_account(page):
     # ============================================================
     # Verify that a user can register successfully using
@@ -187,7 +215,7 @@ def test_signup_new_email_account(page):
     with page.expect_response(
         lambda response: (
             response.request.method == "POST"
-            and "register" in response.url.lower()
+            and "/api/ai_dashboard/create_user" in response.url
         ),
         timeout=15000
     ) as response_info:
@@ -195,20 +223,35 @@ def test_signup_new_email_account(page):
         signup_page.submit()
 
     response = response_info.value
+    response_data = response.json()
 
     # Verify that the registration request succeeded.
-    assert response.ok, (
+    assert response.status == 200, (
         f"Registration request failed. "
         f"HTTP status: {response.status}"
     )
 
-    # Verify that the frontend success message is displayed.
+    # Verify that the registered username matches the expected username.
+    expected_username = f"ai_dashboard_{email}"
+
+    assert response_data["username"] == expected_username, (
+        "Registered username does not match the expected username."
+    )
+
+    # ============================================================
+    # Verify redirection to the login page.
+    # ============================================================
+
+    # Verify that the Sign in button is displayed.
     expect(
-        page.get_by_text(
-            "Your account has been created",
-            exact=False
-        )
-    ).to_be_visible()
+        page.get_by_role("button", name="Sign in")
+    ).to_be_visible(timeout=15000)
+
+    # Verify that the user is redirected to the login page.
+    expect(page).to_have_url(
+        "https://dev.app.agnoshealth.com/ai_dashboard/login"
+    )
+
 
 
 def test_signup_existing_email_rejected(page):
