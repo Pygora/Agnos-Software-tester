@@ -11,31 +11,6 @@ This project uses the Page Object Model (POM) design pattern to organize page el
 - **Pytest** - Test framework
 - **python-dotenv** - Environment variable management
 
-## Project Structure
-
-agnosd-web-tests/
-│
-├── pages/
-│   ├── __init__.py
-│   ├── login_page.py
-│   ├── signup_page.py
-│   └── dashboard_page.py
-│
-├── tests/
-│   ├── test_login.py
-│   ├── test_logout.py
-│   ├── test_signup.py
-│   ├── test_filter.py
-│   ├── test_search.py
-│   └── test_download.py
-│
-├── .env
-├── .gitignore
-├── config.py
-├── pytest.ini
-├── requirements.txt
-└── README.md
-
 ## Test Coverage
 
 ### 1. Login
